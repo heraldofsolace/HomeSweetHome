@@ -7,7 +7,7 @@
 #include "cmd_add.h"
 #include "core/config.h"
 #include <fmt/core.h>
-#include <core/target_state.h>
+#include <core/source_state.h>
 
 namespace home_sweet_home::cmd {
   void setup_cmd_add(CLI::App &app, Config const &config) {
@@ -24,16 +24,12 @@ namespace home_sweet_home::cmd {
   }
 
   void run_cmd_add(CmdAddOptions const &opt,Config const &config) {
-    target_state ts;
-    ts.target_dir = config.destination;
-    ts.source_dir = config.source;
-    std::cout << config.source << std::endl;
-    ts.populate();
+    source_state ts(config.destination, config.source);
     for(auto &arg: opt.targets) {
-      ts.add(arg);
+      ts.add_path(arg, nullptr);
       if(opt.recursive && std::filesystem::is_directory(arg)) {
         for(const auto& file: std::filesystem::recursive_directory_iterator(arg)) {
-          ts.add(file.path().string());
+          ts.add_path(file.path().string(), nullptr);
         }
       }
     }

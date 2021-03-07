@@ -3,16 +3,17 @@
 #include "CLI/CLI.hpp"
 #include "cmd_init.h"
 #include "cmd_add.h"
+#include "cmd_dump.h"
 #include "rang.hpp"
-#include "core/attr.h"
 #include "core/config.h"
 #include <git2.h>
 #include <fmt/core.h>
-#include <core/target_state.h>
+#include <core/source_state.h>
 
 using home_sweet_home::config::Config;
 using home_sweet_home::cmd::setup_cmd_init;
 using home_sweet_home::cmd::setup_cmd_add;
+using home_sweet_home::cmd::setup_cmd_dump;
 using CLI::App;
 
 int main(int argc, char** argv) {
@@ -27,6 +28,7 @@ int main(int argc, char** argv) {
   app.set_config("-c,--config", config.config_file);
   setup_cmd_init(app, config);
   setup_cmd_add(app, config);
+  setup_cmd_dump(app, config);
   std::atexit([](){std::cout << rang::style::reset;});
   try {
     app.parse(argc, argv);
@@ -46,6 +48,7 @@ int main(int argc, char** argv) {
         exit(1);
       }
     }
+
   });
 
   if(app.got_subcommand("init")) {

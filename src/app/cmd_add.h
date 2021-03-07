@@ -6,6 +6,7 @@
 #define HOMESWEETHOME_SRC_APP_CMD_ADD_H
 
 #include "core/config.h"
+#include "core/source_state.h"
 #include <vector>
 
 namespace home_sweet_home::cmd {
