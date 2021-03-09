@@ -29,8 +29,9 @@ namespace home_sweet_home {
       constexpr static const std::string_view   once_suffix  {"once"}     ;
       constexpr static const std::string_view  private_suffix {"private"}   ;
       constexpr static const std::string_view   run_suffix   {"run"}     ;
-      constexpr static const std::string_view symlink_suffix { "symlink"}   ;
-      constexpr static const std::string_view template_suffix {"tmpl"};
+      constexpr static const std::string_view symlink_suffix{"symlink"};
+      constexpr static const std::string_view hidden_suffix{"hidden"};
+      constexpr static const std::string_view template_suffix{"tmpl"};
 
 
       static std::string& must_trim_suffix(std::string &s, const std::string_view &suffix);

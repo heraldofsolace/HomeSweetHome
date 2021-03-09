@@ -22,15 +22,15 @@ struct source_state {
 
   std::shared_ptr<entry> find_by_target_name(std::shared_ptr<entry> ent, std::string t_name);
   std::shared_ptr<entry> find_by_source_name(std::shared_ptr<entry> ent, std::string t_name);
-  void add(const std::string& target, std::shared_ptr<entry> current);
-  void add_path(const std::string& target, std::shared_ptr<entry> current);
+  void add(const std::string &target, std::shared_ptr<entry> current, bool force);
+  void add_path(const std::string &target, std::shared_ptr<entry> current, bool force);
   void print();
 
   std::string make_target_name_from_source_name(std::string source_name);
-  std::string make_source_name_from_target_name(const std::string& target_name);
-  std::string get_target_name(const std::string& source_name);
+  std::string make_source_name_from_target_name(const std::string &target_name);
+  std::string get_target_name(const std::string &source_name);
 
-  void populate(const std::string& source, std::shared_ptr<entry> current);
+  void populate(const std::string &source, std::shared_ptr<entry> current);
   void populate();
 
   json dump_json();

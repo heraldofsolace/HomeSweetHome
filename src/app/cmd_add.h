@@ -16,6 +16,7 @@ struct CmdAddOptions {
   bool follow;
   bool exact;
   bool recursive;
+  bool force;
   std::vector<std::string> targets;
   //TODO Add rest
 };

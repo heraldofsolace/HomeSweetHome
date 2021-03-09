@@ -8,12 +8,14 @@
 #include <iostream>
 #include <numeric>
 #include <utility>
-
+#include <fmt/core.h>
+#include <range/v3/all.hpp>
 #include "app.h"
 
 std::shared_ptr<entry> source_state::find_by_target_name(std::shared_ptr<entry> ent, std::string t_name) {
-  for(auto &t: ent->entries) {
-    if(t->target_name ==  t_name) return t;
+  for (auto &t: ent->entries) {
+    if (t->target_name==t_name)
+      return t;
   }
   return nullptr;
 }
@@ -25,56 +27,73 @@ std::shared_ptr<entry> source_state::find_by_source_name(std::shared_ptr<entry> 
   return nullptr;
 }
 
-void source_state::add(const std::string& target, std::shared_ptr<entry> current) {
+void source_state::add(const std::string &target, std::shared_ptr<entry> current, bool force) {
 
   auto parent = std::filesystem::path(target).parent_path();
   auto filename = std::filesystem::path(target).filename();
-  if(current ==nullptr) current = source_dir_entry;
+  if (current==nullptr)
+    current = source_dir_entry;
   std::filesystem::path parent_path;
-  for(auto &t: parent) {
-    auto k = find_by_target_name(current, parent_path / t);
-    if(k == nullptr) {
-      add(t.string(), current);
-      current = find_by_target_name(current, parent_path / t);
+  for (auto &t: parent) {
+    auto k = find_by_target_name(current, parent_path/t);
+    if (k==nullptr) {
+      add(t.string(), current, force);
+      current = find_by_target_name(current, parent_path/t);
     } else {
       current = k;
     }
     parent_path /= t;
   }
-  std::shared_ptr<entry> t;
-  if(fs::is_directory(target_dir / target)) {
-    t = std::make_shared<dir_entry>(target, std::filesystem::path(current->source_name) / make_source_name_from_target_name(filename), current,
-                                    false,
-                                    false);
-
-  } else if(fs::is_regular_file(target_dir / target)) {
-    t = std::make_shared<file_entry>(target, std::filesystem::path(current->source_name) / make_source_name_from_target_name(filename), current,
-                                    false,
-                                    false);
+  auto source_name = std::filesystem::path(current->source_name)/make_source_name_from_target_name(filename);
+  if (auto l = find_by_source_name(current, source_name); l!=nullptr && !force) {
+    std::cerr << fmt::format("{} already added. Add the -f flag to force", l->target_name) << std::endl;
+    exit(1);
   }
-  else {
+  std::shared_ptr<entry> t;
+  if (fs::is_directory(target_dir/target)) {
+    t = std::make_shared<dir_entry>(target, source_name, current,
+                                    false,
+                                    false);
+    fs::create_directory(source_dir/t->source_name, target_dir/t->target_name);
+
+  } else if (fs::is_regular_file(target_dir/target)) {
+    t = std::make_shared<file_entry>(target, source_name, current,
+                                     false,
+                                     false);
+    fs::copy(target_dir/t->target_name, source_dir/t->source_name, fs::copy_options::update_existing);
+
+  } else {
     std::cerr << "WHAT" << std::endl;
     exit(1);
   }
   current->entries.push_back(t);
 }
-void source_state::add_path(const std::string& target, std::shared_ptr<entry> current) {
+void source_state::add_path(const std::string &target, std::shared_ptr<entry> current, bool force) {
   auto target_rel_path = std::filesystem::relative(target, target_dir);
 
-  add(target_rel_path, current);
+  add(target_rel_path, current, force);
 }
 void source_state::print() {
   source_dir_entry->print();
 }
 
 std::string source_state::make_target_name_from_source_name(std::string source_name) {
-  if(source_name.find(home_sweet_home::suffix::suffix_delimiter) == std::string::npos) return source_name;
+  if (source_name.find(home_sweet_home::suffix::suffix_delimiter)==std::string::npos)
+    return source_name;
   auto suffixes = home_sweet_home::suffix::get_suffix_list(source_name);
   auto actual_name = home_sweet_home::suffix::remove_suffixes(source_name);
-
+  if (ranges::find(suffixes, home_sweet_home::suffix::hidden_suffix)!=ranges::end(suffixes)) {
+    actual_name = "." + actual_name;
+  }
   return actual_name;
 }
 std::string source_state::make_source_name_from_target_name(const std::string& target_name) {
+  if (target_name.starts_with(".")) {
+    return fmt::format("{}{}{}",
+                       target_name.substr(1),
+                       home_sweet_home::suffix::suffix_delimiter,
+                       home_sweet_home::suffix::hidden_suffix);
+  }
   return target_name;
 }
 std::string source_state::get_target_name(const std::string &source_name) {
@@ -112,7 +131,6 @@ void source_state::populate(const std::string &source, std::shared_ptr<entry> cu
     t = std::make_shared<dir_entry>( std::filesystem::path(current->target_name) / make_target_name_from_source_name(filename), source, current,
                                      false,
                                      false);
-
   } else if(fs::is_regular_file(source_dir / source)) {
     t = std::make_shared<file_entry>( std::filesystem::path(current->target_name) / make_target_name_from_source_name(filename), source, current,
                                      false,

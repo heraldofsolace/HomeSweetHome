@@ -4,7 +4,6 @@
 
 #include "entry.h"
 #include "app.h"
-#include <string>
 
 using entries::entry;
 
