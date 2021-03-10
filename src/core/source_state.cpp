@@ -12,7 +12,7 @@
 #include <range/v3/all.hpp>
 #include "app.h"
 
-std::shared_ptr<entry> source_state::find_by_target_name(std::shared_ptr<entry> ent, std::string t_name) {
+std::shared_ptr<entry> source_state::find_by_target_name(const std::shared_ptr<entry>& ent, const std::string& t_name) {
   for (auto &t: ent->entries) {
     if (t->target_name==t_name)
       return t;
@@ -20,7 +20,7 @@ std::shared_ptr<entry> source_state::find_by_target_name(std::shared_ptr<entry> 
   return nullptr;
 }
 
-std::shared_ptr<entry> source_state::find_by_source_name(std::shared_ptr<entry> ent, std::string t_name) {
+std::shared_ptr<entry> source_state::find_by_source_name(const std::shared_ptr<entry>& ent, const std::string& t_name) {
   for(auto &t: ent->entries) {
     if(t->source_name == t_name) return t;
   }
@@ -71,7 +71,7 @@ void source_state::add(const std::string &target, std::shared_ptr<entry> current
 void source_state::add_path(const std::string &target, std::shared_ptr<entry> current, bool force) {
   auto target_rel_path = std::filesystem::relative(target, target_dir);
 
-  add(target_rel_path, current, force);
+  add(target_rel_path, std::move(current), force);
 }
 void source_state::print() {
   source_dir_entry->print();
@@ -146,4 +146,21 @@ json source_state::dump_json() {
 }
 YAML::Node source_state::dump_yaml() {
   return source_dir_entry->to_yaml();
+}
+std::shared_ptr<entry> source_state::locate_entry(std::string target_name) const {
+  auto rel_path = fs::relative(target_name, target_dir);
+  fs::path parent_path;
+  auto current = source_dir_entry;
+  for(auto &p: fs::path(rel_path)) {
+    auto k = find_by_target_name(current, parent_path / p);
+    if(k ==nullptr) {
+      std::cerr << "Not added" << std::endl;
+      exit(1);
+    }
+
+    current = k;
+    parent_path /= p;
+  }
+
+  return current;
 }

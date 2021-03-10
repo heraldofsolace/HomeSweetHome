@@ -36,13 +36,21 @@ find_package(Boost REQUIRED)
 find_package(libgit2 REQUIRED)
 # Adds Boost::boost
 
+# FetchContent added in CMake 3.11, downloads during the configure step
+include(FetchContent)
+# FetchContent_MakeAvailable was not added until CMake 3.14; use our shim
+if(${CMAKE_VERSION} VERSION_LESS 3.14)
+    include(cmake/add_FetchContent_MakeAvailable.cmake)
+endif()
+
 
 # Formatting library
-#FetchContent_Declare(
-#        fmtlib
-#        GIT_REPOSITORY https://github.com/fmtlib/fmt.git
-#        GIT_TAG 7.1.3)
-#FetchContent_MakeAvailable(fmtlib)
+FetchContent_Declare(
+        dtl
+        GIT_REPOSITORY https://github.com/cubicdaiya/dtl.git
+        GIT_TAG master
+)
+FetchContent_MakeAvailable(dtl)
 ## Adds fmt::fmt
 #include_directories(extern)
 function(create_target_directory_groups target_name)

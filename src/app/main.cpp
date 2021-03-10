@@ -4,6 +4,8 @@
 #include "cmd_init.h"
 #include "cmd_add.h"
 #include "cmd_dump.h"
+#include "cmd_edit.h"
+#include "cmd_diff.h"
 #include "rang.hpp"
 #include "core/config.h"
 #include <git2.h>
@@ -14,6 +16,8 @@ using home_sweet_home::config::Config;
 using home_sweet_home::cmd::setup_cmd_init;
 using home_sweet_home::cmd::setup_cmd_add;
 using home_sweet_home::cmd::setup_cmd_dump;
+using home_sweet_home::cmd::setup_cmd_edit;
+using home_sweet_home::cmd::setup_cmd_diff;
 using CLI::App;
 
 int main(int argc, char** argv) {
@@ -29,6 +33,8 @@ int main(int argc, char** argv) {
   setup_cmd_init(app, config);
   setup_cmd_add(app, config);
   setup_cmd_dump(app, config);
+  setup_cmd_edit(app, config);
+  setup_cmd_diff(app, config);
   std::atexit([](){std::cout << rang::style::reset;});
   try {
     app.parse(argc, argv);
