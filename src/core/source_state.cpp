@@ -27,7 +27,10 @@ std::shared_ptr<entry> source_state::find_by_source_name(const std::shared_ptr<e
   return nullptr;
 }
 
-void source_state::add(const std::string &target, std::shared_ptr<entry> current, bool force) {
+void source_state::add(const std::string &target,
+                       std::shared_ptr<entry> current,
+                       bool force,
+                       std::shared_ptr<modifier> mod) {
 
   auto parent = std::filesystem::path(target).parent_path();
   auto filename = std::filesystem::path(target).filename();
@@ -37,7 +40,7 @@ void source_state::add(const std::string &target, std::shared_ptr<entry> current
   for (auto &t: parent) {
     auto k = find_by_target_name(current, parent_path/t);
     if (k==nullptr) {
-      add(t.string(), current, force);
+      add(t.string(), current, force, mod);
       current = find_by_target_name(current, parent_path/t);
     } else {
       current = k;
@@ -54,13 +57,13 @@ void source_state::add(const std::string &target, std::shared_ptr<entry> current
     t = std::make_shared<dir_entry>(target, source_name, current,
                                     false,
                                     false);
-    fs::create_directory(source_dir/t->source_name, target_dir/t->target_name);
+    mod->create_directory(source_dir/t->source_name, target_dir/t->target_name);
 
   } else if (fs::is_regular_file(target_dir/target)) {
     t = std::make_shared<file_entry>(target, source_name, current,
                                      false,
                                      false);
-    fs::copy(target_dir/t->target_name, source_dir/t->source_name, fs::copy_options::update_existing);
+    mod->copy_file(target_dir/t->target_name, source_dir/t->source_name, fs::copy_options::update_existing);
 
   } else {
     std::cerr << "WHAT" << std::endl;
@@ -68,10 +71,13 @@ void source_state::add(const std::string &target, std::shared_ptr<entry> current
   }
   current->entries.push_back(t);
 }
-void source_state::add_path(const std::string &target, std::shared_ptr<entry> current, bool force) {
+void source_state::add_path(const std::string &target,
+                            std::shared_ptr<entry> current,
+                            bool force,
+                            std::shared_ptr<modifier> mod) {
   auto target_rel_path = std::filesystem::relative(target, target_dir);
 
-  add(target_rel_path, std::move(current), force);
+  add(target_rel_path, std::move(current), force, std::move(mod));
 }
 void source_state::print() {
   source_dir_entry->print();

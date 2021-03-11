@@ -22,8 +22,7 @@ struct CmdInitOptions {
 };
 void setup_cmd_init(CLI::App &app, Config const &config);
 void run_cmd_init(CmdInitOptions const &opt,Config const  &config);
-void create_dir(CmdInitOptions const &opt, Config const &config);
-void make_dir(std::string const &path);
+
 int fetch_progress(
     const git_transfer_progress *stats,
     void *payload);

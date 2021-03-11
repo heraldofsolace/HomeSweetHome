@@ -21,6 +21,7 @@ struct Config {
   std::string config_file;
 
   bool verbose = false;
+  bool dry_run = false;
   Config();
 };
 }

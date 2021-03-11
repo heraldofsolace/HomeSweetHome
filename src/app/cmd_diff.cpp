@@ -11,7 +11,7 @@ void setup_cmd_diff(CLI::App &app, Config const &config) {
   auto opt = std::make_shared<CmdDiffOptions>();
   auto sub = app.add_subcommand("diff");
 
-  sub->add_flag("-f,--format", opt->format, "Apply the changes after initialization");
+  sub->add_option("-f,--format", opt->format, "Apply the changes after initialization");
   sub->add_option("targets", opt->targets)
       ->transform([](const std::string &s) { return std::filesystem::absolute(s); });
 

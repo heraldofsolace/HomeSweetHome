@@ -25,9 +25,12 @@ int main(int argc, char** argv) {
   Config config;
   git_libgit2_init();
 
-  app.add_option("-d,--dest", config.destination, "Destination directory", true)->transform([](std::string source) { return std::filesystem::absolute(source).string(); });
-  app.add_option("-s,--source", config.source, "Source directory", true)->transform([](std::string source) { return std::filesystem::absolute(source).string(); });
-  app.add_option("-v,--verbose", config.verbose, "Verbose");
+  app.add_option("-d,--dest", config.destination, "Destination directory", true)
+      ->transform([](std::string source) { return std::filesystem::absolute(source).string(); });
+  app.add_option("-s,--source", config.source, "Source directory", true)
+      ->transform([](std::string source) { return std::filesystem::absolute(source).string(); });
+  app.add_flag("-v,--verbose", config.verbose, "Verbose");
+  app.add_flag("--dry-run", config.dry_run);
 
   app.set_config("-c,--config", config.config_file);
   setup_cmd_init(app, config);
@@ -35,7 +38,7 @@ int main(int argc, char** argv) {
   setup_cmd_dump(app, config);
   setup_cmd_edit(app, config);
   setup_cmd_diff(app, config);
-  std::atexit([](){std::cout << rang::style::reset;});
+  std::atexit([]() { std::cout << rang::style::reset; });
   try {
     app.parse(argc, argv);
   } catch (const CLI::ParseError &e) {

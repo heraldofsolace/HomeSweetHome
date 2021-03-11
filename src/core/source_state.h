@@ -8,7 +8,9 @@
 #include <string>
 #include <utility>
 #include <filesystem>
+#include <memory>
 #include "entry.h"
+#include "core/modifier.h"
 
 using entries::entry;
 using entries::dir_entry;
@@ -20,16 +22,16 @@ struct source_state {
   fs::path source_dir;
   std::shared_ptr<entry> source_dir_entry;
 
-  static std::shared_ptr<entry> find_by_target_name(const std::shared_ptr<entry>& ent, const std::string& t_name);
-  static std::shared_ptr<entry> find_by_source_name(const std::shared_ptr<entry>& ent, const std::string& t_name);
-  void add(const std::string &target, std::shared_ptr<entry> current, bool force);
-  void add_path(const std::string &target, std::shared_ptr<entry> current, bool force);
+  static std::shared_ptr<entry> find_by_target_name(const std::shared_ptr<entry> &ent, const std::string &t_name);
+  static std::shared_ptr<entry> find_by_source_name(const std::shared_ptr<entry> &ent, const std::string &t_name);
+  void add(const std::string &target, std::shared_ptr<entry> current, bool force, std::shared_ptr<modifier> mod);
+  void add_path(const std::string &target, std::shared_ptr<entry> current, bool force, std::shared_ptr<modifier> mod);
   void print();
 
   static std::string make_target_name_from_source_name(std::string source_name);
   static std::string make_source_name_from_target_name(const std::string &target_name);
   std::string get_target_name(const std::string &source_name);
-  std::shared_ptr<entry> locate_entry(std::string target_name) const;
+  [[nodiscard]] std::shared_ptr<entry> locate_entry(std::string target_name) const;
   void populate(const std::string &source, std::shared_ptr<entry> current);
   void populate();
 

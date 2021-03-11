@@ -28,11 +28,17 @@ namespace home_sweet_home::cmd {
   void run_cmd_add(CmdAddOptions const &opt,Config const &config) {
     source_state ts(config.destination, config.source);
     ts.populate();
-    for(auto &arg: opt.targets) {
-      ts.add_path(arg, nullptr, opt.force);
-      if(opt.recursive && std::filesystem::is_directory(arg)) {
-        for(const auto& file: std::filesystem::recursive_directory_iterator(arg)) {
-          ts.add_path(file.path().string(), nullptr, opt.force);
+    std::shared_ptr<modifier> mod;
+    if (config.dry_run) {
+      mod = std::make_shared<dry_run_modifier>();
+    } else {
+      mod = std::make_shared<filesystem_modifier>();
+    }
+    for (auto &arg: opt.targets) {
+      ts.add_path(arg, nullptr, opt.force, mod);
+      if (opt.recursive && std::filesystem::is_directory(arg)) {
+        for (const auto &file: std::filesystem::recursive_directory_iterator(arg)) {
+          ts.add_path(file.path().string(), nullptr, opt.force, mod);
         }
       }
     }
