@@ -12,6 +12,7 @@
 namespace home_sweet_home::cmd {
 using home_sweet_home::config::Config;
 struct CmdApplyOptions {
+  bool recursive = true;
   std::vector<std::string> targets;
   //TODO Add rest
 };

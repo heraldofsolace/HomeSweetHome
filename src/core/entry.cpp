@@ -40,7 +40,7 @@ YAML::Node entries::dir_entry::to_yaml() {
   }
   out << YAML::Key << "entries" << YAML::Value;
   out << YAML::BeginSeq;
-  for(auto &t: entries_yaml) {
+  for (auto &t: entries_yaml) {
     out << t;
   }
   out << YAML::EndSeq;
@@ -50,12 +50,21 @@ YAML::Node entries::dir_entry::to_yaml() {
 
   return node;
 }
+void entries::dir_entry::apply(fs::path source_dir, fs::path target_dir, std::shared_ptr<modifier> mod) {
+  mod->create_directory(target_dir/target_name, source_dir/source_name);
+  entry::apply(source_dir, target_dir, mod);
+}
+void entries::dir_entry::apply_backwards(fs::path source_dir, fs::path target_dir, std::shared_ptr<modifier> mod) {
+  entry::apply_backwards(source_dir, target_dir, mod);
+  mod->create_directory(target_dir/target_name, source_dir/source_name);
+}
+
 json entries::file_entry::to_json() {
   json j = {
-      { "type", "file" },
-      { "is_private", is_private },
-      { "source_name", source_name },
-      { "target_name", target_name }
+      {"type", "file"},
+      {"is_private", is_private},
+      {"source_name", source_name},
+      {"target_name", target_name}
   };
 
   return j;
@@ -73,4 +82,11 @@ YAML::Node entries::file_entry::to_yaml() {
   YAML::Node node = YAML::Load(out.c_str());
 
   return node;
+}
+void entries::file_entry::apply(fs::path source_dir, fs::path target_dir, std::shared_ptr<modifier> mod) {
+  mod->copy_file(source_dir/source_name, target_dir/target_name, fs::copy_options::update_existing);
+}
+void entries::file_entry::apply_backwards(fs::path source_dir, fs::path target_dir, std::shared_ptr<modifier> mod) {
+  entry::apply_backwards(source_dir, target_dir, mod);
+  mod->copy_file(source_dir/source_name, target_dir/target_name, fs::copy_options::update_existing);
 }

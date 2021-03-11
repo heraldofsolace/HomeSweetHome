@@ -9,8 +9,9 @@
 namespace home_sweet_home::cmd {
 void setup_cmd_apply(CLI::App &app, Config const &config) {
   auto opt = std::make_shared<CmdApplyOptions>();
-  auto sub = app.add_subcommand("add");
+  auto sub = app.add_subcommand("apply");
 
+  sub->add_flag("-r,--recursive,!--no-recursive", opt->recursive);
   sub->add_option("targets", opt->targets)
       ->transform([](const std::string &s) { return std::filesystem::absolute(s); });
 
@@ -18,6 +19,20 @@ void setup_cmd_apply(CLI::App &app, Config const &config) {
 }
 
 void run_cmd_apply(CmdApplyOptions const &opt, Config const &config) {
-
+  source_state s(config.destination, config.source);
+  s.populate();
+  std::shared_ptr<modifier> mod;
+  if (config.dry_run) {
+    mod = std::make_shared<dry_run_modifier>();
+  } else {
+    mod = std::make_shared<filesystem_modifier>();
+  }
+  if (opt.targets.empty()) {
+    s.apply(mod);
+  } else {
+    ranges::for_each(opt.targets, [&opt, &s, &mod](auto target) {
+      s.apply(mod, target, opt.recursive);
+    });
+  }
 }
 }

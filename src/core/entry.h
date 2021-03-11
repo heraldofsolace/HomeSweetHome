@@ -13,27 +13,38 @@
 #include <iostream>
 #include <nlohmann/json.hpp>
 #include <yaml-cpp/yaml.h>
+#include <algorithm>
+#include <range/v3/all.hpp>
+#include "modifier.h"
+
 using json = nlohmann::json;
 
 namespace entries {
-  struct entry {
-    std::string target_name;
-    std::string source_name;
-    std::filesystem::perms perm;
+struct entry {
+  std::string target_name;
+  std::string source_name;
+  std::filesystem::perms perm;
 
-    std::vector<std::shared_ptr<entry>> entries;
-    std::weak_ptr<entry> parent_entry;
+  std::vector<std::shared_ptr<entry>> entries;
+  std::weak_ptr<entry> parent_entry;
 
-    virtual json to_json() {
-      std::vector<json> entries_json;
-      for(auto &e: entries) {
-        entries_json.push_back(e->to_json());
-      }
-
-
-      return entries_json;
+  virtual void apply(fs::path source_dir, fs::path target_dir, std::shared_ptr<modifier> mod) {
+    ranges::for_each(entries, [&source_dir, &target_dir, mod](auto e) { e->apply(source_dir, target_dir, mod); });
+  }
+  virtual void apply_backwards(fs::path source_dir, fs::path target_dir, std::shared_ptr<modifier> mod) {
+    if (auto pe = parent_entry.lock()) {
+      pe->apply_backwards(source_dir, target_dir, mod);
     }
-    virtual YAML::Node to_yaml() {
+  }
+  virtual json to_json() {
+    std::vector<json> entries_json;
+    for (auto &e: entries) {
+      entries_json.push_back(e->to_json());
+    }
+
+    return entries_json;
+  }
+  virtual YAML::Node to_yaml() {
       YAML::Emitter out;
       out << YAML::BeginSeq;
       for(auto &t: entries) {
@@ -57,45 +68,57 @@ namespace entries {
 
   };
 
-  struct dir_entry: public entry {
-    bool is_exact;
-    bool is_private;
-    json to_json() override;
-    YAML::Node to_yaml() override;
-    dir_entry(std::string target_name, std::string source_name, const std::shared_ptr<entry>& parent_entry, bool is_private, bool is_exact):
+struct dir_entry : public entry {
+  bool is_exact;
+  bool is_private;
+  json to_json() override;
+  YAML::Node to_yaml() override;
+  void apply(fs::path source_dir, fs::path target_dir, std::shared_ptr<modifier> mod) override;
+  void apply_backwards(fs::path source_dir, fs::path target_dir, std::shared_ptr<modifier> mod) override;
+  dir_entry(std::string target_name,
+            std::string source_name,
+            const std::shared_ptr<entry> &parent_entry,
+            bool is_private,
+            bool is_exact) :
       entry(std::move(target_name), std::move(source_name), parent_entry) {
-      this->is_private = is_private;
-      this->is_exact = is_exact;
-    }
-    void print() override {
-      std::cout << "DIRECTORY" << std::endl;
-      std::cout << "SOURCE: " << source_name << std::endl;
-      std::cout << "TARGET: " << target_name << std::endl;
-      for(auto &t: entries) {
+    this->is_private = is_private;
+    this->is_exact = is_exact;
+  }
+  void print() override {
+    std::cout << "DIRECTORY" << std::endl;
+    std::cout << "SOURCE: " << source_name << std::endl;
+    std::cout << "TARGET: " << target_name << std::endl;
+    for (auto &t: entries) {
         t->print();
       }
     }
   };
 
-  struct file_entry: public entry {
-    bool is_empty;
-    bool is_encrypted;
-    bool is_executable;
-    bool is_once;
-    int order;
-    bool is_private;
-    bool is_template;
+struct file_entry : public entry {
+  bool is_empty;
+  bool is_encrypted;
+  bool is_executable;
+  bool is_once;
+  int order;
+  bool is_private;
+  bool is_template;
 
-    json to_json() override;
-    YAML::Node to_yaml() override;
-    file_entry(std::string target_name, std::string source_name, const std::shared_ptr<entry>& parent_entry, bool is_private, bool is_exact):
-        entry(std::move(target_name), std::move(source_name), parent_entry) {
-      this->is_private = is_private;
+  void apply(fs::path source_dir, fs::path target_dir, std::shared_ptr<modifier> mod) override;
+  void apply_backwards(fs::path source_dir, fs::path target_dir, std::shared_ptr<modifier> mod) override;
+  json to_json() override;
+  YAML::Node to_yaml() override;
+  file_entry(std::string target_name,
+             std::string source_name,
+             const std::shared_ptr<entry> &parent_entry,
+             bool is_private,
+             bool is_exact) :
+      entry(std::move(target_name), std::move(source_name), parent_entry) {
+    this->is_private = is_private;
 
-    }
+  }
 
-    void print() override {
-      std::cout << "FILE" << std::endl;
+  void print() override {
+    std::cout << "FILE" << std::endl;
       std::cout << "SOURCE: " << source_name << std::endl;
       std::cout << "TARGET: " << target_name << std::endl;
       for(auto &t: entries) {

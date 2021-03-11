@@ -170,3 +170,24 @@ std::shared_ptr<entry> source_state::locate_entry(std::string target_name) const
 
   return current;
 }
+void source_state::apply(const std::shared_ptr<modifier> &mod, const std::shared_ptr<entry> &e) const {
+  e->apply(source_dir, target_dir, mod);
+}
+void source_state::apply(const std::shared_ptr<modifier> &mod, const std::string &target_name, bool recursive) {
+  if (target_name.empty()) {
+    source_dir_entry->apply(source_dir, target_dir, mod);
+  } else {
+    auto k = locate_entry(target_name);
+    if (k==nullptr) {
+      std::cerr << "Is not added" << std::endl;
+      return;
+    }
+    k->apply_backwards(source_dir, target_dir, mod);
+    if (recursive) {
+      ranges::for_each(k->entries, [this, &mod](auto e) {
+        e->apply(source_dir, target_dir, mod);
+      });
+    }
+
+  }
+}

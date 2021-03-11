@@ -34,14 +34,15 @@ struct source_state {
   [[nodiscard]] std::shared_ptr<entry> locate_entry(std::string target_name) const;
   void populate(const std::string &source, std::shared_ptr<entry> current);
   void populate();
-
+  void apply(const std::shared_ptr<modifier> &mod, const std::shared_ptr<entry> &e) const;
+  void apply(const std::shared_ptr<modifier> &mod, const std::string &target_name = "", bool recursive = true);
   json dump_json();
   YAML::Node dump_yaml();
   source_state() {
-    source_dir_entry = std::make_shared<entry>("","", nullptr);
+    source_dir_entry = std::make_shared<entry>("", "", nullptr);
   }
 
-  source_state(std::string target_dir, std::string source_dir): source_state() {
+  source_state(std::string target_dir, std::string source_dir) : source_state() {
     this->source_dir = std::move(source_dir);
     this->target_dir = std::move(target_dir);
   }
