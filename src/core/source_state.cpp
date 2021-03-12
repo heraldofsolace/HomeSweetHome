@@ -31,6 +31,7 @@ std::shared_ptr<entry> source_state::find_by_source_name(const std::shared_ptr<e
 void source_state::add(const std::string &target,
                        std::shared_ptr<entry> current,
                        bool force,
+                       bool tmpl,
                        std::shared_ptr<modifier> mod) {
 
   auto parent = std::filesystem::path(target).parent_path();
@@ -41,7 +42,7 @@ void source_state::add(const std::string &target,
   for (auto &t: parent) {
     auto k = find_by_target_name(current, parent_path/t);
     if (k==nullptr) {
-      add(t.string(), current, force, mod);
+      add(t.string(), current, force,  tmpl, mod);
       current = find_by_target_name(current, parent_path/t);
     } else {
       current = k;
@@ -49,6 +50,7 @@ void source_state::add(const std::string &target,
     parent_path /= t;
   }
   auto source_name = std::filesystem::path(current->source_name)/make_source_name_from_target_name(filename);
+  if(tmpl) source_name += ".tmpl";
   if (auto l = find_by_source_name(current, source_name); l!=nullptr && !force) {
     std::cerr << fmt::format("{} already added. Add the -f flag to force", l->target_name) << std::endl;
     exit(1);
@@ -75,10 +77,11 @@ void source_state::add(const std::string &target,
 void source_state::add_path(const std::string &target,
                             std::shared_ptr<entry> current,
                             bool force,
+                            bool tmpl,
                             std::shared_ptr<modifier> mod) {
   auto target_rel_path = std::filesystem::relative(target, target_dir);
 
-  add(target_rel_path, std::move(current), force, std::move(mod));
+  add(target_rel_path, std::move(current), force, tmpl, std::move(mod));
 }
 void source_state::print() {
   source_dir_entry->print();
@@ -95,12 +98,13 @@ std::pair<std::string,
     info = file_entry::file_entry_info{};
   }
   std::string name = source_name;
-  if (source_name.find(home_sweet_home::suffix::suffix_delimiter)==std::string::npos)
-    return std::make_pair(source_name, info);
   if (!is_dir && source_name.ends_with(".tmpl")) {
     source_name = source_name.erase(source_name.size() - 5);
     std::get<file_entry::file_entry_info>(info).is_template = true;
   }
+  if (source_name.find(home_sweet_home::suffix::suffix_delimiter)==std::string::npos)
+    return std::make_pair(source_name, info);
+
   auto suffixes = home_sweet_home::suffix::get_suffix_list(source_name);
   auto actual_name = home_sweet_home::suffix::remove_suffixes(source_name);
   if (ranges::find(suffixes, home_sweet_home::suffix::hidden_suffix)!=ranges::end(suffixes)) {
@@ -117,7 +121,7 @@ std::string source_state::make_source_name_from_target_name(const std::string& t
   }
   return target_name;
 }
-std::string source_state::get_target_name(const std::string &source_name) {
+std::string source_state::get_target_name(const std::string &source_name) const {
   std::filesystem::path p;
   for(auto &t: std::filesystem::relative(source_name, source_dir)) {
     p /= make_target_name_from_source_name(t, false).first; // Don't care about type
@@ -171,7 +175,7 @@ json source_state::dump_json() {
 YAML::Node source_state::dump_yaml() {
   return source_dir_entry->to_yaml();
 }
-std::shared_ptr<entry> source_state::locate_entry(std::string target_name) const {
+std::shared_ptr<entry> source_state::locate_entry(const std::string& target_name) const {
   auto rel_path = fs::relative(target_name, target_dir);
   fs::path parent_path;
   auto current = source_dir_entry;
@@ -209,3 +213,23 @@ void source_state::apply(const std::shared_ptr<modifier> &mod, const std::string
 
   }
 }
+void source_state::walk(const std::function<void(std::shared_ptr<entry>)>& func) {
+  func(source_dir_entry);
+  source_dir_entry->walk(func);
+}
+void source_state::put_templates(template_engine &te) {
+
+  walk([this, &te](auto e) {
+
+
+    if(e->source_name.empty() || e->target_name.empty()) return;
+    auto f = std::dynamic_pointer_cast<file_entry>(e);
+    if(f && f->info.is_template) {
+
+      auto result = te.get_env().parse_template(source_dir / f->source_name);
+      te.get_env().include_template(e->source_name, result);
+    }
+  });
+
+}
+

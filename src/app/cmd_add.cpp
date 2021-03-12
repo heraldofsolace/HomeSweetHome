@@ -19,8 +19,9 @@ namespace home_sweet_home::cmd {
     sub->add_flag("-x,--exact", opt->exact, "Apply the changes after initialization");
     sub->add_flag("-r,--recursive", opt->recursive, "Apply the changes after initialization");
     sub->add_flag("-f,--force", opt->force, "Apply the changes after initialization");
+    sub->add_flag("-t,--template", opt->tmpl);
     sub->add_option("targets", opt->targets)
-        ->transform([](const std::string &s) { return std::filesystem::absolute(s); });
+        ->transform([](const std::string &s) { return std::filesystem::absolute(s); })->check(CLI::ExistingPath);
 
     sub -> final_callback([opt, &config]() { run_cmd_add(*opt, config); });
   }
@@ -37,10 +38,10 @@ namespace home_sweet_home::cmd {
       mod = std::make_shared<filesystem_modifier>(te);
     }
     for (auto &arg: opt.targets) {
-      ts.add_path(arg, nullptr, opt.force, mod);
+      ts.add_path(arg, nullptr, opt.force, opt.tmpl, mod);
       if (opt.recursive && std::filesystem::is_directory(arg)) {
         for (const auto &file: std::filesystem::recursive_directory_iterator(arg)) {
-          ts.add_path(file.path().string(), nullptr, opt.force, mod);
+          ts.add_path(file.path().string(), nullptr, opt.force, opt.tmpl, mod);
         }
       }
     }

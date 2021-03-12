@@ -24,7 +24,7 @@ struct entry {
   std::string target_name;
   std::string source_name;
   std::filesystem::perms perm;
-
+  bool is_file;
   std::vector<std::shared_ptr<entry>> entries;
   std::weak_ptr<entry> parent_entry;
 
@@ -35,6 +35,13 @@ struct entry {
     if (auto pe = parent_entry.lock()) {
       pe->apply_backwards(source_dir, target_dir, mod);
     }
+  }
+
+  virtual void walk(std::function<void(std::shared_ptr<entry>)> func) {
+    ranges::for_each(entries, [&func](auto t){
+      func(t);
+      t->walk(func);
+    });
   }
   virtual json to_json() {
     std::vector<json> entries_json;
@@ -87,6 +94,7 @@ struct dir_entry : public entry {
             bool is_exact) :
       entry(std::move(target_name), std::move(source_name), parent_entry) {
     this->info = {.is_exact = is_exact, .is_private = is_private};
+    this->is_file= false;
   }
   void print() override {
     std::cout << "DIRECTORY" << std::endl;
@@ -122,7 +130,7 @@ struct file_entry : public entry {
              bool is_template) :
       entry(std::move(target_name), std::move(source_name), parent_entry) {
     this->info = {.is_private = is_private, .is_template = is_template};
-
+    this->is_file = true;
   }
 
   void print() override {

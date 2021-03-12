@@ -97,3 +97,4 @@ void entries::file_entry::apply_backwards(fs::path source_dir, fs::path target_d
   else
     mod->execute_template(source_dir/source_name, target_dir/target_name);
 }
+

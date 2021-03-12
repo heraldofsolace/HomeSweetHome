@@ -9,6 +9,7 @@
 #include <nlohmann/json.hpp>
 #include <string>
 #include "template_data.h"
+
 using inja::Environment;
 using nlohmann::json;
 
@@ -18,7 +19,8 @@ class template_engine {
 
 public:
   std::string render(std::ifstream &fs);
-  std::string render(std::string template_text);
+  std::string render(const std::string& template_text);
+  Environment& get_env();
   template_engine(json data) : data(data) {
     //TODO Add functions
   }

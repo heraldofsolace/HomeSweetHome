@@ -7,12 +7,14 @@
 #include "cmd_apply.h"
 #include "core/template_engine.h"
 #include "core/template_data.h"
+
 namespace home_sweet_home::cmd {
 void setup_cmd_apply(CLI::App &app, Config const &config) {
   auto opt = std::make_shared<CmdApplyOptions>();
   auto sub = app.add_subcommand("apply");
 
   sub->add_flag("-r,--recursive,!--no-recursive", opt->recursive);
+
   sub->add_option("targets", opt->targets)
       ->transform([](const std::string &s) { return std::filesystem::absolute(s); });
 
@@ -25,6 +27,7 @@ void run_cmd_apply(CmdApplyOptions const &opt, Config const &config) {
   std::shared_ptr<modifier> mod;
   template_data data(config);
   template_engine te(data.get_data());
+  s.put_templates(te);
   if (config.dry_run) {
     mod = std::make_shared<dry_run_modifier>();
   } else {
