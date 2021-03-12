@@ -9,6 +9,7 @@
 #include <utility>
 #include <filesystem>
 #include <memory>
+#include <variant>
 #include "entry.h"
 #include "core/modifier.h"
 
@@ -28,7 +29,10 @@ struct source_state {
   void add_path(const std::string &target, std::shared_ptr<entry> current, bool force, std::shared_ptr<modifier> mod);
   void print();
 
-  static std::string make_target_name_from_source_name(std::string source_name);
+  std::pair<std::string,
+            std::variant<file_entry::file_entry_info,
+                         dir_entry::dir_entry_info>> make_target_name_from_source_name(std::string source_name,
+                                                                                       bool is_dir);
   static std::string make_source_name_from_target_name(const std::string &target_name);
   std::string get_target_name(const std::string &source_name);
   [[nodiscard]] std::shared_ptr<entry> locate_entry(std::string target_name) const;

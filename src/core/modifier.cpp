@@ -23,6 +23,13 @@ void filesystem_modifier::delete_file(fs::path path) {
 void filesystem_modifier::create_directory(fs::path path, fs::path attributes) {
   fs::create_directory(path, attributes);
 }
+void filesystem_modifier::execute_template(fs::path path, fs::path to) {
+  std::ifstream fs(path);
+  auto result = engine.render(fs);
+  std::ofstream of(to);
+  of << result;
+  of.close();
+}
 void dry_run_modifier::create_directories(fs::path path) {
   fmt::print("Creating directory: {}\n", path);
 }
@@ -37,6 +44,9 @@ void dry_run_modifier::delete_file(fs::path path) {
 }
 void dry_run_modifier::create_directory(fs::path path, fs::path attributes) {
   fmt::print("Creating directory {} with same attributes as {}\n", path, attributes);
+}
+void dry_run_modifier::execute_template(fs::path path, fs::path to) {
+  fmt::print("Executing template {} and storing in {}\n", path, to);
 }
 void logging_modifier::create_directories(fs::path path) {
   std::ofstream log(log_path, std::ios::app);
@@ -66,6 +76,12 @@ void logging_modifier::create_directory(fs::path path, fs::path attributes) {
   std::ofstream log(log_path, std::ios::app);
   log << fmt::format("Creating directory {} with same attributes as {}\n", path, attributes);
   actual_modifier->create_directory(path, attributes);
+  log.close();
+}
+void logging_modifier::execute_template(fs::path path, fs::path to) {
+  std::ofstream log(log_path, std::ios::app);
+  log << fmt::format("Executing template {}\n", path);
+  actual_modifier->execute_template(path, to);
   log.close();
 }
 

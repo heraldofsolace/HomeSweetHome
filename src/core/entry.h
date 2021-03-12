@@ -69,8 +69,13 @@ struct entry {
   };
 
 struct dir_entry : public entry {
-  bool is_exact;
-  bool is_private;
+  struct dir_entry_info {
+    bool is_exact = false;
+    bool is_private = false;
+  };
+
+  dir_entry_info info{};
+
   json to_json() override;
   YAML::Node to_yaml() override;
   void apply(fs::path source_dir, fs::path target_dir, std::shared_ptr<modifier> mod) override;
@@ -81,8 +86,7 @@ struct dir_entry : public entry {
             bool is_private,
             bool is_exact) :
       entry(std::move(target_name), std::move(source_name), parent_entry) {
-    this->is_private = is_private;
-    this->is_exact = is_exact;
+    this->info = {.is_exact = is_exact, .is_private = is_private};
   }
   void print() override {
     std::cout << "DIRECTORY" << std::endl;
@@ -95,13 +99,17 @@ struct dir_entry : public entry {
   };
 
 struct file_entry : public entry {
-  bool is_empty;
-  bool is_encrypted;
-  bool is_executable;
-  bool is_once;
-  int order;
-  bool is_private;
-  bool is_template;
+  struct file_entry_info {
+    bool is_empty = false;
+    bool is_encrypted = false;
+    bool is_executable = false;
+    bool is_once = false;
+    int order = 1;
+    bool is_private = false;
+    bool is_template = false;
+  };
+
+  file_entry_info info;
 
   void apply(fs::path source_dir, fs::path target_dir, std::shared_ptr<modifier> mod) override;
   void apply_backwards(fs::path source_dir, fs::path target_dir, std::shared_ptr<modifier> mod) override;
@@ -111,9 +119,9 @@ struct file_entry : public entry {
              std::string source_name,
              const std::shared_ptr<entry> &parent_entry,
              bool is_private,
-             bool is_exact) :
+             bool is_template) :
       entry(std::move(target_name), std::move(source_name), parent_entry) {
-    this->is_private = is_private;
+    this->info = {.is_private = is_private, .is_template = is_template};
 
   }
 

@@ -44,10 +44,12 @@ void setup_cmd_init(CLI::App &app, Config const &config) {
 
 void run_cmd_init(CmdInitOptions const &opt, Config const &config) {
   std::unique_ptr<modifier> mod;
+  template_data data(config);
+  template_engine te(data.get_data());
   if (config.dry_run) {
     mod = std::make_unique<dry_run_modifier>();
   } else {
-    mod = std::make_unique<filesystem_modifier>();
+    mod = std::make_unique<filesystem_modifier>(te);
   }
   mod->create_directories(config.config_dir);
   if (opt.repo.empty()) {

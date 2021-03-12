@@ -9,11 +9,11 @@ using entries::entry;
 
 json entries::dir_entry::to_json() {
   json j = {
-      { "type", "dir" },
-      { "is_private", is_private },
-      { "is_exact", is_exact },
-      { "source_name", source_name },
-      { "target_name", target_name }
+      {"type", "dir"},
+      {"is_private", info.is_private},
+      {"is_exact", info.is_exact},
+      {"source_name", source_name},
+      {"target_name", target_name}
   };
 
   std::vector<json> entries_json;
@@ -29,13 +29,13 @@ YAML::Node entries::dir_entry::to_yaml() {
   YAML::Emitter out;
   out << YAML::BeginMap;
   out << YAML::Key << "type" << YAML::Value << "dir";
-  out << YAML::Key << "is_private" << YAML::Value << is_private;
-  out << YAML::Key << "is_exact" << YAML::Value << is_exact;
+  out << YAML::Key << "is_private" << YAML::Value << info.is_private;
+  out << YAML::Key << "is_exact" << YAML::Value << info.is_exact;
   out << YAML::Key << "source_name" << YAML::Value << source_name;
   out << YAML::Key << "target_name" << YAML::Value << target_name;
 
   std::vector<YAML::Node> entries_yaml;
-  for(auto &e: entries) {
+  for (auto &e: entries) {
     entries_yaml.push_back(e->to_yaml());
   }
   out << YAML::Key << "entries" << YAML::Value;
@@ -62,9 +62,10 @@ void entries::dir_entry::apply_backwards(fs::path source_dir, fs::path target_di
 json entries::file_entry::to_json() {
   json j = {
       {"type", "file"},
-      {"is_private", is_private},
+      {"is_private", info.is_private},
       {"source_name", source_name},
-      {"target_name", target_name}
+      {"target_name", target_name},
+      {"is_template", info.is_template},
   };
 
   return j;
@@ -73,7 +74,7 @@ YAML::Node entries::file_entry::to_yaml() {
   YAML::Emitter out;
   out << YAML::BeginMap;
   out << YAML::Key << "type" << YAML::Value << "file";
-  out << YAML::Key << "is_private" << YAML::Value << is_private;
+  out << YAML::Key << "is_private" << YAML::Value << info.is_private;
   out << YAML::Key << "source_name" << YAML::Value << source_name;
   out << YAML::Key << "target_name" << YAML::Value << target_name;
 
@@ -84,9 +85,15 @@ YAML::Node entries::file_entry::to_yaml() {
   return node;
 }
 void entries::file_entry::apply(fs::path source_dir, fs::path target_dir, std::shared_ptr<modifier> mod) {
-  mod->copy_file(source_dir/source_name, target_dir/target_name, fs::copy_options::update_existing);
+  if (!info.is_template)
+    mod->copy_file(source_dir/source_name, target_dir/target_name, fs::copy_options::update_existing);
+  else
+    mod->execute_template(source_dir/source_name, target_dir/target_name);
 }
 void entries::file_entry::apply_backwards(fs::path source_dir, fs::path target_dir, std::shared_ptr<modifier> mod) {
   entry::apply_backwards(source_dir, target_dir, mod);
-  mod->copy_file(source_dir/source_name, target_dir/target_name, fs::copy_options::update_existing);
+  if (!info.is_template)
+    mod->copy_file(source_dir/source_name, target_dir/target_name, fs::copy_options::update_existing);
+  else
+    mod->execute_template(source_dir/source_name, target_dir/target_name);
 }

@@ -29,10 +29,12 @@ namespace home_sweet_home::cmd {
     source_state ts(config.destination, config.source);
     ts.populate();
     std::shared_ptr<modifier> mod;
+    template_data data(config);
+    template_engine te(data.get_data());
     if (config.dry_run) {
       mod = std::make_shared<dry_run_modifier>();
     } else {
-      mod = std::make_shared<filesystem_modifier>();
+      mod = std::make_shared<filesystem_modifier>(te);
     }
     for (auto &arg: opt.targets) {
       ts.add_path(arg, nullptr, opt.force, mod);

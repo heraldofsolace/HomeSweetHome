@@ -10,6 +10,7 @@
 #include <utility>
 #include <fmt/core.h>
 #include <range/v3/all.hpp>
+#include <variant>
 #include "app.h"
 
 std::shared_ptr<entry> source_state::find_by_target_name(const std::shared_ptr<entry>& ent, const std::string& t_name) {
@@ -83,15 +84,29 @@ void source_state::print() {
   source_dir_entry->print();
 }
 
-std::string source_state::make_target_name_from_source_name(std::string source_name) {
+std::pair<std::string,
+          std::variant<file_entry::file_entry_info,
+                       dir_entry::dir_entry_info>> source_state::make_target_name_from_source_name(std::string source_name,
+                                                                                                   bool is_dir) {
+  std::variant<file_entry::file_entry_info, dir_entry::dir_entry_info> info;
+  if (is_dir) {
+    info = dir_entry::dir_entry_info{};
+  } else {
+    info = file_entry::file_entry_info{};
+  }
+  std::string name = source_name;
   if (source_name.find(home_sweet_home::suffix::suffix_delimiter)==std::string::npos)
-    return source_name;
+    return std::make_pair(source_name, info);
+  if (!is_dir && source_name.ends_with(".tmpl")) {
+    source_name = source_name.erase(source_name.size() - 5);
+    std::get<file_entry::file_entry_info>(info).is_template = true;
+  }
   auto suffixes = home_sweet_home::suffix::get_suffix_list(source_name);
   auto actual_name = home_sweet_home::suffix::remove_suffixes(source_name);
   if (ranges::find(suffixes, home_sweet_home::suffix::hidden_suffix)!=ranges::end(suffixes)) {
     actual_name = "." + actual_name;
   }
-  return actual_name;
+  return std::make_pair(actual_name, info);
 }
 std::string source_state::make_source_name_from_target_name(const std::string& target_name) {
   if (target_name.starts_with(".")) {
@@ -105,7 +120,7 @@ std::string source_state::make_source_name_from_target_name(const std::string& t
 std::string source_state::get_target_name(const std::string &source_name) {
   std::filesystem::path p;
   for(auto &t: std::filesystem::relative(source_name, source_dir)) {
-    p /= make_target_name_from_source_name(t);
+    p /= make_target_name_from_source_name(t, false).first; // Don't care about type
   }
 
   return p;
@@ -134,13 +149,16 @@ void source_state::populate(const std::string &source, std::shared_ptr<entry> cu
 
   std::shared_ptr<entry> t;
   if(fs::is_directory(source_dir / source)) {
-    t = std::make_shared<dir_entry>( std::filesystem::path(current->target_name) / make_target_name_from_source_name(filename), source, current,
-                                     false,
-                                     false);
+    auto[name, info] = make_target_name_from_source_name(filename, true);
+    t = std::make_shared<dir_entry>(std::filesystem::path(current->target_name)/name, source, current,
+                                    std::get<dir_entry::dir_entry_info>(info).is_private,
+                                    std::get<dir_entry::dir_entry_info>(info).is_exact);
   } else if(fs::is_regular_file(source_dir / source)) {
-    t = std::make_shared<file_entry>( std::filesystem::path(current->target_name) / make_target_name_from_source_name(filename), source, current,
-                                     false,
-                                     false);
+    auto[name, info] = make_target_name_from_source_name(filename, false);
+
+    t = std::make_shared<file_entry>(std::filesystem::path(current->target_name)/name, source, current,
+                                     std::get<file_entry::file_entry_info>(info).is_private,
+                                     std::get<file_entry::file_entry_info>(info).is_template);
   } else {
     std::cerr << "WHAT" << std::endl;
     exit(1);
