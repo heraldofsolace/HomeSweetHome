@@ -1,6 +1,6 @@
 # HomeSweetHome
 
-[![GitHub Release](https://img.shields.io/github/release/heraldofsolace/HomeSweetHome.svg)](https://github.com/twpayne/heraldofsolace/HomeSweetHome)
+[![GitHub Release](https://img.shields.io/github/release/heraldofsolace/homesweethome.svg)](https://github.com/twpayne/heraldofsolace/HomeSweetHome)
 
 A dotfile manager written in C++.
 
