@@ -1,3 +1,0 @@
-repository='https://github.com/cubicdaiya/dtl.git'
-module=''
-tag='origin'

@@ -1,2 +1,0 @@
-/bin/ar qc ../../lib/libcore.a  CMakeFiles/core.dir/config.cpp.o CMakeFiles/core.dir/app.cpp.o CMakeFiles/core.dir/utilities.cpp.o CMakeFiles/core.dir/source_state.cpp.o CMakeFiles/core.dir/entry.cpp.o CMakeFiles/core.dir/shell_command.cpp.o CMakeFiles/core.dir/modifier.cpp.o CMakeFiles/core.dir/template_data.cpp.o CMakeFiles/core.dir/template_engine.cpp.o
-/bin/ranlib ../../lib/libcore.a
