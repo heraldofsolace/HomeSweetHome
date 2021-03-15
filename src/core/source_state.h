@@ -46,6 +46,7 @@ struct source_state {
   void put_templates(template_engine &te);
   json dump_json();
   YAML::Node dump_yaml();
+  bool remove_entry(const std::string &target_name, bool remove, const std::shared_ptr<modifier> &mod);
   source_state() {
     source_dir_entry = std::make_shared<entry>("", "", nullptr);
   }

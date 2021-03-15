@@ -1,0 +1,53 @@
+[settings]
+    arch=x86_64
+    build_type=Release
+    compiler=gcc
+    compiler.libcxx=libstdc++11
+    compiler.version=10
+    os=Linux
+
+[requires]
+    catch2/2.Y.Z
+    cli11/1.Y.Z
+    fmt/7.Y.Z
+    inja/3.Y.Z
+    rang/3.Y.Z
+    range-v3/0.11.0
+    yaml-cpp/0.6.3
+
+[options]
+
+
+[full_settings]
+    arch=x86_64
+    arch_build=x86_64
+    build_type=Release
+    compiler=gcc
+    compiler.libcxx=libstdc++11
+    compiler.version=10
+    os=Linux
+    os_build=Linux
+
+[full_requires]
+    catch2/2.13.4:5ab84d6acfe1f23c4fae0ab88f26e3a396351ac9
+    cli11/1.9.1:5ab84d6acfe1f23c4fae0ab88f26e3a396351ac9
+    fmt/7.1.3:b173bbda18164d49a449ffadc1c9e817f49e819d
+    inja/3.1.0:5ab84d6acfe1f23c4fae0ab88f26e3a396351ac9
+    rang/3.1.0:5ab84d6acfe1f23c4fae0ab88f26e3a396351ac9
+    range-v3/0.11.0:5ab84d6acfe1f23c4fae0ab88f26e3a396351ac9
+    yaml-cpp/0.6.3:b173bbda18164d49a449ffadc1c9e817f49e819d
+
+[full_options]
+    catch2:with_main=False
+    fmt:fPIC=True
+    fmt:header_only=False
+    fmt:shared=False
+    fmt:with_fmt_alias=False
+    yaml-cpp:fPIC=True
+    yaml-cpp:shared=False
+
+[recipe_hash]
+
+
+[env]
+

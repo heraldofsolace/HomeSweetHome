@@ -70,6 +70,15 @@ home_sweet_home data
 
 The templating uses [Inja](https://github.com/pantor/inja) syntax.
 
+6. Forget a managed file:
+
+```shell
+home_sweet_home forget ~/.bashrc # Add -f flag to not get prompted
+```
+
+By default, this will only delete **the managed copy in source directory** and not the one in target directory. Add
+the "-r" flag to also remove the one in target directory.
+
 ## Installation
 
 Coming soon.

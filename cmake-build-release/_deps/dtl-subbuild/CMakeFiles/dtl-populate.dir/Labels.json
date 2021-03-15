@@ -1,0 +1,46 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "/home/aniket/CLionProjects/home_sweet_home/cmake-build-release/_deps/dtl-subbuild/CMakeFiles/dtl-populate"
+		},
+		{
+			"file" : "/home/aniket/CLionProjects/home_sweet_home/cmake-build-release/_deps/dtl-subbuild/CMakeFiles/dtl-populate.rule"
+		},
+		{
+			"file" : "/home/aniket/CLionProjects/home_sweet_home/cmake-build-release/_deps/dtl-subbuild/CMakeFiles/dtl-populate-complete.rule"
+		},
+		{
+			"file" : "/home/aniket/CLionProjects/home_sweet_home/cmake-build-release/_deps/dtl-subbuild/dtl-populate-prefix/src/dtl-populate-stamp/dtl-populate-install.rule"
+		},
+		{
+			"file" : "/home/aniket/CLionProjects/home_sweet_home/cmake-build-release/_deps/dtl-subbuild/dtl-populate-prefix/src/dtl-populate-stamp/dtl-populate-mkdir.rule"
+		},
+		{
+			"file" : "/home/aniket/CLionProjects/home_sweet_home/cmake-build-release/_deps/dtl-subbuild/dtl-populate-prefix/src/dtl-populate-stamp/dtl-populate-download.rule"
+		},
+		{
+			"file" : "/home/aniket/CLionProjects/home_sweet_home/cmake-build-release/_deps/dtl-subbuild/dtl-populate-prefix/src/dtl-populate-stamp/dtl-populate-update.rule"
+		},
+		{
+			"file" : "/home/aniket/CLionProjects/home_sweet_home/cmake-build-release/_deps/dtl-subbuild/dtl-populate-prefix/src/dtl-populate-stamp/dtl-populate-patch.rule"
+		},
+		{
+			"file" : "/home/aniket/CLionProjects/home_sweet_home/cmake-build-release/_deps/dtl-subbuild/dtl-populate-prefix/src/dtl-populate-stamp/dtl-populate-configure.rule"
+		},
+		{
+			"file" : "/home/aniket/CLionProjects/home_sweet_home/cmake-build-release/_deps/dtl-subbuild/dtl-populate-prefix/src/dtl-populate-stamp/dtl-populate-build.rule"
+		},
+		{
+			"file" : "/home/aniket/CLionProjects/home_sweet_home/cmake-build-release/_deps/dtl-subbuild/dtl-populate-prefix/src/dtl-populate-stamp/dtl-populate-test.rule"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"dtl-populate"
+		],
+		"name" : "dtl-populate"
+	}
+}

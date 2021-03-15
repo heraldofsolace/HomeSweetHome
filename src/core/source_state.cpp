@@ -221,15 +221,31 @@ void source_state::put_templates(template_engine &te) {
 
   walk([this, &te](auto e) {
 
-
-    if(e->source_name.empty() || e->target_name.empty()) return;
+    if (e->source_name.empty() || e->target_name.empty())
+      return;
     auto f = std::dynamic_pointer_cast<file_entry>(e);
-    if(f && f->info.is_template) {
+    if (f && f->info.is_template) {
 
-      auto result = te.get_env().parse_template(source_dir / f->source_name);
+      auto result = te.get_env().parse_template(source_dir/f->source_name);
       te.get_env().include_template(e->source_name, result);
     }
   });
 
+}
+bool source_state::remove_entry(const std::string &target_name, bool remove, const std::shared_ptr<modifier> &mod) {
+  auto k = locate_entry(target_name);
+  if (!k)
+    return false;
+  mod->delete_file(source_dir/k->source_name);
+  auto &entries = k->parent_entry.lock()->entries;
+  entries |= ranges::actions::remove_if([this, &target_name](auto e) {
+    return e->target_name==fs::relative(target_name, target_dir);
+  });
+
+  if (remove) {
+    mod->delete_file(target_dir/k->target_name);
+  }
+
+  return true;
 }
 
