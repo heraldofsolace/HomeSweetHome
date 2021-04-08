@@ -20,6 +20,9 @@ using entries::dir_entry;
 using entries::file_entry;
 namespace fs = std::filesystem;
 
+/**
+ * source_state
+ */
 struct source_state {
   fs::path target_dir;
   fs::path source_dir;
@@ -28,6 +31,14 @@ struct source_state {
   static std::shared_ptr<entry> find_by_target_name(const std::shared_ptr<entry> &ent, const std::string &t_name);
   static std::shared_ptr<entry> find_by_source_name(const std::shared_ptr<entry> &ent, const std::string &t_name);
   void add(const std::string &target, std::shared_ptr<entry> current, bool force, bool tmpl, std::shared_ptr<modifier> mod);
+  /**
+   *
+   * @param target Target name
+   * @param current Current entry
+   * @param force force?
+   * @param tmpl template?
+   * @param mod modifier
+   */
   void add_path(const std::string &target, std::shared_ptr<entry> current, bool force, bool tmpl, std::shared_ptr<modifier> mod);
   void print();
 

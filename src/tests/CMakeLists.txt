@@ -3,7 +3,7 @@
 # Tests need to be added as executables first
 add_executable(tests
         main.cpp
-        test_attr.cpp
+
 )
 
 # Should be linked to the main library, as well as the Catch2 testing library

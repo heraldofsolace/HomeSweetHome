@@ -13,11 +13,20 @@
 using inja::Environment;
 using nlohmann::json;
 
+/**
+ * sdd
+ */
 class template_engine {
-  Environment env;
+
+  Environment env; /**< Inja environment */
   json data;
 
 public:
+  /**
+   * Render template
+   * @param fs ifstream
+   * @return Rendered string
+   */
   std::string render(std::ifstream &fs);
   std::string render(const std::string& template_text);
   Environment& get_env();

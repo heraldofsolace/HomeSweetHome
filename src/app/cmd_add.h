@@ -21,6 +21,9 @@ struct CmdAddOptions {
   std::vector<std::string> targets;
   //TODO Add rest
 };
+///
+/// \param app AAA
+/// \param config AAA
 void setup_cmd_add(CLI::App &app, Config const &config);
 void run_cmd_add(CmdAddOptions const &opt,Config const &config);
 

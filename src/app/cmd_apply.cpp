@@ -21,6 +21,11 @@ void setup_cmd_apply(CLI::App &app, Config const &config) {
   sub->final_callback([opt, &config]() { run_cmd_apply(*opt, config); });
 }
 
+/**
+ *
+ * @param opt
+ * @param config
+ */
 void run_cmd_apply(CmdApplyOptions const &opt, Config const &config) {
   source_state s(config.destination, config.source);
   s.populate();

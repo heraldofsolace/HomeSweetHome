@@ -20,8 +20,11 @@
 using json = nlohmann::json;
 
 namespace entries {
+/**
+ * Represents an entry
+ */
 struct entry {
-  std::string target_name;
+  std::string target_name; /**< target name */
   std::string source_name;
   std::filesystem::perms perm;
   bool is_file;
